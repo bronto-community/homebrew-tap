@@ -25,7 +25,7 @@ cask "bronto" do
   end
 
   name "bronto"
-  desc "Community CLI for the Bronto observability platform."
+  desc "Community CLI for the Bronto observability platform"
   homepage "https://github.com/bronto-community/bronto-cli"
 
   livecheck do
@@ -38,5 +38,4 @@ cask "bronto" do
   zsh_completion "completions/bronto.zsh"
 
   # No zap stanza required
-
 end
