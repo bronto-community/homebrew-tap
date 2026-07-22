@@ -1,0 +1,21 @@
+name: Audit
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: brew audit & style
+        run: |
+          TAP_DIR="$(brew --repository)/Library/Taps/bronto-community/homebrew-tap"
+          mkdir -p "$(dirname "$TAP_DIR")"
+          ln -s "$PWD" "$TAP_DIR"
+          brew audit --cask --online bronto-community/tap/bronto || true
+          brew style bronto-community/tap/bronto
