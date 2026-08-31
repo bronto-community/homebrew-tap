@@ -28,7 +28,8 @@ brew trust --cask bronto-community/tap/bronto bronto-community/tap/compy
 
 `bronto` installs shell completions for bash, zsh, and fish automatically.
 
-`compy`'s menu bar icon is opt-in — after installing, run `compy tray install`.
+`compy` puts itself in your menu bar on install. To remove it, use "Remove from
+Menu Bar" in its menu or run `compy tray uninstall`.
 
 ## Updating
 
