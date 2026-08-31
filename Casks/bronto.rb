@@ -42,5 +42,4 @@ cask "bronto" do
   end
 
   # No zap stanza required
-
 end
