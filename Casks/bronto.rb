@@ -3,24 +3,23 @@ cask "bronto" do
   version "0.5.1"
 
   on_macos do
-    on_intel do
-      sha256 "4eab5ca44da1b5e0aefc1624acd5b7591a7b9557844c61622a3973254036650f"
-      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_amd64.tar.gz"
-    end
     on_arm do
       sha256 "0eb3025701926ac9242ed0e16a510035524c709bb6f5411374aa93f67bc91e17"
       url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_arm64.tar.gz"
     end
-  end
-
-  on_linux do
     on_intel do
-      sha256 "610c5790dddf174e163624f98345172fa864ca4b0fba65ca34b575649e64cedb"
-      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_amd64.tar.gz"
+      sha256 "4eab5ca44da1b5e0aefc1624acd5b7591a7b9557844c61622a3973254036650f"
+      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_amd64.tar.gz"
     end
+  end
+  on_linux do
     on_arm do
       sha256 "6f913686c56fed3b10ea57d20f83151cfa5e9847ab32cffc844ff8d47e26062b"
       url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_arm64.tar.gz"
+    end
+    on_intel do
+      sha256 "610c5790dddf174e163624f98345172fa864ca4b0fba65ca34b575649e64cedb"
+      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_amd64.tar.gz"
     end
   end
 
@@ -44,5 +43,4 @@ cask "bronto" do
   end
 
   # No zap stanza required
-
 end

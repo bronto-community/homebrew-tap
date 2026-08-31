@@ -1,0 +1,11 @@
+# Blank issues stay enabled so maintainers (and the Audit workflow) can file
+# tap-level problems. The links steer user-facing bug reports upstream, where
+# the code actually lives.
+blank_issues_enabled: true
+contact_links:
+  - name: bronto CLI bug or feature request
+    url: https://github.com/bronto-community/bronto-cli/issues
+    about: Anything about the bronto command itself — this tap only carries its cask.
+  - name: compy bug or feature request
+    url: https://github.com/bronto-community/compy/issues
+    about: Anything about the compy command, collector, or menu bar app.
