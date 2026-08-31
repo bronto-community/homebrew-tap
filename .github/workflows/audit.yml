@@ -46,9 +46,13 @@ jobs:
       - name: Normalize generated casks
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # Must target the tap, not Casks/*.rb: tap mode applies a stricter cop
-          # set than file mode, so fixing files individually leaves offenses the
-          # gate below still rejects.
+          # Targets the tap, exactly like the gate below, so the fixer and the
+          # gate can never disagree about what is in scope. (Tap mode also
+          # covers the workflow files; the cask cop set itself is the same as
+          # file mode.) This matters because Homebrew versions differ in which
+          # cops they enforce — the runner's brew and a contributor's local brew
+          # flag different offences on identical files, so whatever the runner
+          # demands is what gets fixed here.
           brew style --fix bronto-community/tap || true
           if git diff --quiet -- Casks; then
             echo "No style normalization needed."
