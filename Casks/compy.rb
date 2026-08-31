@@ -3,13 +3,13 @@ cask "compy" do
   version "0.1.3"
 
   on_macos do
-    on_intel do
-      sha256 "dd94aca926a77b440c4e04a4011286473565a279fa6c976ec81cde84ae08bfea"
-      url "https://github.com/bronto-community/compy/releases/download/v#{version}/compy_#{version}_darwin_amd64.tar.gz"
-    end
     on_arm do
       sha256 "73257298097026dc32b85dca9a3a6fcdb608162ccca2ecc6fc41b715b57ae971"
       url "https://github.com/bronto-community/compy/releases/download/v#{version}/compy_#{version}_darwin_arm64.tar.gz"
+    end
+    on_intel do
+      sha256 "dd94aca926a77b440c4e04a4011286473565a279fa6c976ec81cde84ae08bfea"
+      url "https://github.com/bronto-community/compy/releases/download/v#{version}/compy_#{version}_darwin_amd64.tar.gz"
     end
   end
 
@@ -24,22 +24,22 @@ cask "compy" do
   binary "compy"
 
   postflight do
-    if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+    if system_command("/usr/bin/xattr", args: ["-h"]).exit_status.zero?
       system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", staged_path.to_s]
     end
     system_command "#{HOMEBREW_PREFIX}/bin/compy", args: ["tray", "install"], must_succeed: false
   end
 
   uninstall launchctl: [
-      "io.bronto.compy.tray",
-      "io.bronto.compy.collector",
-    ]
+    "io.bronto.compy.collector",
+    "io.bronto.compy.tray",
+  ]
 
   zap trash: [
-      "~/Library/LaunchAgents/io.bronto.compy.tray.plist",
-      "~/Library/LaunchAgents/io.bronto.compy.collector.plist",
-      "~/Library/Application Support/compy",
-    ]
+    "~/Library/Application Support/compy",
+    "~/Library/LaunchAgents/io.bronto.compy.collector.plist",
+    "~/Library/LaunchAgents/io.bronto.compy.tray.plist",
+  ]
 
   caveats <<~EOS
     compy lives in your menu bar. To take it out, use "Remove from
