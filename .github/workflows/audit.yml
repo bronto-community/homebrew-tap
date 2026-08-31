@@ -62,8 +62,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "style: normalize goreleaser-generated casks [skip ci]" -- Casks
+
+          # Only push when this run's commit is still the branch tip. A re-run
+          # checks out the original SHA, so once an earlier run's normalization
+          # has landed the push is a guaranteed non-fast-forward — which turned
+          # a re-run of the compy v0.1.4 audit red for no real reason. The local
+          # tree keeps the fix either way, so the gate below still validates it.
+          remote_tip="$(git ls-remote origin "refs/heads/${GITHUB_REF_NAME}" | cut -f1)"
+          if [ "$remote_tip" != "$GITHUB_SHA" ]; then
+            echo "::notice::${GITHUB_REF_NAME} has moved on (tip ${remote_tip} != ${GITHUB_SHA}); skipping the normalization push."
+            exit 0
+          fi
           # Explicit refspec: checkout leaves HEAD detached on push events.
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          # A racing push should warn, not fail: the next push re-normalizes.
+          git push origin "HEAD:${GITHUB_REF_NAME}" \
+            || echo "::warning::normalization push rejected; a later run will redo it."
 
       - name: brew style
         run: brew style bronto-community/tap
@@ -80,7 +93,23 @@ jobs:
             casks+=("bronto-community/tap/$(basename "$f" .rb)")
           done
           echo "Auditing: ${casks[*]}"
-          brew audit --cask --strict --online "${casks[@]}"
+
+          # --online downloads every archive, so it inherits GitHub's asset-CDN
+          # flakiness. The v0.5.2 release failed this step on a bare
+          # `curl: (56) ... error: 504` against a tarball that was fine minutes
+          # later — a false alarm on a freshly published asset. Retry before
+          # believing it; a real problem still fails, just 90s later.
+          for attempt in 1 2 3; do
+            if brew audit --cask --strict --online "${casks[@]}"; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::brew audit attempt ${attempt}/3 failed; retrying in $((attempt * 30))s"
+              sleep "$((attempt * 30))"
+            fi
+          done
+          echo "::error::brew audit failed 3 consecutive attempts — treating as real."
+          exit 1
 
   # A red run on main notified nobody, so six consecutive release failures went
   # unnoticed. Surface them as an issue instead.
@@ -94,6 +123,11 @@ jobs:
       - name: Open or update tracking issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # This job has no checkout, so gh cannot infer the repository from a
+          # git remote — without this every gh call dies on "failed to run git:
+          # fatal: not a git repository", which is exactly how the first real
+          # audit failure managed to notify nobody.
+          GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           TITLE="Audit failing on main"

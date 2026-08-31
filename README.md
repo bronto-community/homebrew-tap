@@ -61,6 +61,11 @@ is not `brew style`-clean and exposes no knob to change that, the workflow
 normalizes style on `main` and commits the result rather than failing on every
 release.
 
+**Don't commit a local `brew style --fix`.** Homebrew versions disagree about
+which cask cops to enforce — a local run and the runner will produce different
+files from the same input, so hand-normalizing just starts a fight with the next
+CI run. The runner is the authority; let it do the normalizing.
+
 ## Verifying artifacts
 
 Both projects ship a cosign-signed (keyless/OIDC) `checksums.txt` and
