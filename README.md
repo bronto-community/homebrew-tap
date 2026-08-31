@@ -2,13 +2,14 @@
 
 [![Audit](https://github.com/bronto-community/homebrew-tap/actions/workflows/audit.yml/badge.svg)](https://github.com/bronto-community/homebrew-tap/actions/workflows/audit.yml)
 
-Homebrew tap for the [bronto-community](https://github.com/bronto-community)
-tools that support the [Bronto](https://bronto.io) observability platform.
+Homebrew tap for command-line tools published by the
+[bronto-community](https://github.com/bronto-community) org. What each tool
+works with is up to that tool — some are specific to a vendor, some aren't.
 
 | Cask | What it is | Upstream |
 | --- | --- | --- |
-| `bronto` | Community command-line client for Bronto | [bronto-cli](https://github.com/bronto-community/bronto-cli) |
-| `compy` | Local OpenTelemetry Collector manager for the dev loop | [compy](https://github.com/bronto-community/compy) |
+| `bronto` | Community CLI for the [Bronto](https://bronto.io) observability platform | [bronto-cli](https://github.com/bronto-community/bronto-cli) |
+| `compy` | Local OpenTelemetry Collector manager for the dev loop — vendor-neutral | [compy](https://github.com/bronto-community/compy) |
 
 ## Install
 
@@ -28,8 +29,10 @@ brew trust --cask bronto-community/tap/bronto bronto-community/tap/compy
 
 `bronto` installs shell completions for bash, zsh, and fish automatically.
 
-`compy` puts itself in your menu bar on install. To remove it, use "Remove from
-Menu Bar" in its menu or run `compy tray uninstall`.
+`compy`'s menu bar item is managed with `compy tray install` and
+`compy tray uninstall`. Whether a fresh install adds it for you has changed
+between versions, so follow the caveats `brew install` prints — those always
+match the version you actually got.
 
 ## Updating
 
@@ -60,10 +63,12 @@ release.
 
 ## Verifying artifacts
 
-Every bronto-cli release ships a cosign-signed `checksums.txt` and
-per-archive SBOMs — see the
-[security policy](https://github.com/bronto-community/bronto-cli/blob/main/SECURITY.md)
-for the verification one-liner.
+Both projects ship a cosign-signed (keyless/OIDC) `checksums.txt` and
+per-archive SBOMs with every release. Verifying the one signature transitively
+verifies each archive via its checksum. See the security policy for the
+verification one-liner:
+[bronto-cli](https://github.com/bronto-community/bronto-cli/blob/main/SECURITY.md),
+[compy](https://github.com/bronto-community/compy/blob/main/SECURITY.md).
 
 Note that the published binaries are **not** Developer ID notarized, so both
 casks strip the macOS quarantine attribute on install to avoid Gatekeeper's
