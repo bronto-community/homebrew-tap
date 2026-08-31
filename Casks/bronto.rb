@@ -37,9 +37,7 @@ cask "bronto" do
   zsh_completion "completions/bronto.zsh"
 
   postflight do
-    if OS.mac?
-      system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", staged_path]
-    end
+    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", staged_path] if OS.mac?
   end
 
   # No zap stanza required

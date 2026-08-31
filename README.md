@@ -13,8 +13,17 @@ tools that support the [Bronto](https://bronto.io) observability platform.
 ## Install
 
 ```sh
+brew trust --tap bronto-community/tap
 brew install bronto-community/tap/bronto
 brew install bronto-community/tap/compy
+```
+
+Recent Homebrew requires explicit trust for third-party taps and silently
+ignores casks from untrusted ones. If you would rather not trust the whole tap
+(which covers all current *and future* casks in it), trust them individually:
+
+```sh
+brew trust --cask bronto-community/tap/bronto bronto-community/tap/compy
 ```
 
 `bronto` installs shell completions for bash, zsh, and fish automatically.
