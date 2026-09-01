@@ -74,9 +74,21 @@ jobs:
             exit 0
           fi
           # Explicit refspec: checkout leaves HEAD detached on push events.
-          # A racing push should warn, not fail: the next push re-normalizes.
-          git push origin "HEAD:${GITHUB_REF_NAME}" \
-            || echo "::warning::normalization push rejected; a later run will redo it."
+          #
+          # Distinguish a lost race from a broken push. Swallowing every failure
+          # would be silently fatal: `brew style` below runs on the local tree,
+          # which is already fixed, so the job would go green forever while the
+          # normalization never actually landed in git. Since the tip matched
+          # moments ago, a failure is only benign if the tip has since moved.
+          if ! git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            new_tip="$(git ls-remote origin "refs/heads/${GITHUB_REF_NAME}" | cut -f1)"
+            if [ "$new_tip" != "$remote_tip" ]; then
+              echo "::warning::normalization push lost a race (tip moved to ${new_tip}); a later run will redo it."
+            else
+              echo "::error::normalization push failed while ${GITHUB_REF_NAME} stayed at ${remote_tip} — a credentials or permissions problem, not a race."
+              exit 1
+            fi
+          fi
 
       - name: brew style
         run: brew style bronto-community/tap
