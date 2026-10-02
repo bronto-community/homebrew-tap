@@ -21,7 +21,8 @@ jobs:
   audit:
     runs-on: macos-latest
     permissions:
-      # Only exercised on push to main, by the "Normalize" step below.
+      # Only exercised on main (push, schedule, dispatch), by the
+      # "Normalize" step below.
       contents: write
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -44,8 +45,14 @@ jobs:
       # no knob to change that. Hand-fixing the files is futile — the next
       # release overwrites them — so main normalizes itself rather than going red
       # on every release, which is what happened for six releases straight.
+      # Runs on every main run, not just pushes. Homebrew adds autocorrectable
+      # cops between releases; when normalization only ran on push, the weekly
+      # schedule hit them first, skipped the fix, and went red week after week
+      # (issue #9: four scheduled failures on an unchanged commit, until the
+      # next release push normalized main). The push below is [skip ci], and
+      # the tip check already handles a main that moved under the run.
       - name: Normalize generated casks
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: |
           # Targets the tap, exactly like the gate below, so the fixer and the
           # gate can never disagree about what is in scope. (Tap mode also
@@ -178,3 +185,29 @@ jobs:
           else
             gh issue create --title "$TITLE" --label audit-failure --body-file /tmp/body.md
           fi
+
+  # The other half of notify: once main audits clean again, close the tracking
+  # issue instead of leaving it open after the cause is gone.
+  resolve:
+    needs: audit
+    if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Close tracking issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No checkout here either; see the notify job.
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          TITLE="Audit failing on main"
+          existing="$(gh issue list --state open --search "$TITLE in:title" \
+            --json number --jq '.[0].number // empty')"
+          if [ -z "$existing" ]; then
+            echo "No open tracking issue."
+            exit 0
+          fi
+          gh issue close "$existing" --comment "$(printf "\`Audit\` passed on \`%s\` (\`%s\`): %s" \
+            "$GITHUB_REF_NAME" "$GITHUB_EVENT_NAME" "$RUN_URL")"
