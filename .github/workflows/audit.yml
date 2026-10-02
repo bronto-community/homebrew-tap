@@ -20,6 +20,10 @@ concurrency:
 jobs:
   audit:
     runs-on: macos-latest
+    outputs:
+      # The commit this run actually audited (after any normalization), so
+      # resolve can tell a stale rerun from a check of the current tip.
+      audited_sha: ${{ steps.audited.outputs.sha }}
     permissions:
       # Only exercised on main (push, schedule, dispatch), by the
       # "Normalize" step below.
@@ -102,6 +106,10 @@ jobs:
               exit 1
             fi
           fi
+
+      - name: Record audited commit
+        id: audited
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: brew style
         run: brew style bronto-community/tap
@@ -201,7 +209,17 @@ jobs:
           # No checkout here either; see the notify job.
           GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          AUDITED_SHA: ${{ needs.audit.outputs.audited_sha }}
         run: |
+          # Only a pass on the current tip says main is healthy. A rerun of an
+          # older commit (or a run whose normalization lost the push race)
+          # audited a tree that isn't main any more, so it must not close a
+          # tracker a newer failing commit may have opened.
+          tip="$(gh api "repos/${GH_REPO}/git/ref/heads/${GITHUB_REF_NAME}" --jq .object.sha)"
+          if [ "$AUDITED_SHA" != "$tip" ]; then
+            echo "::notice::audited ${AUDITED_SHA}, but ${GITHUB_REF_NAME} is at ${tip}; leaving the tracking issue alone."
+            exit 0
+          fi
           TITLE="Audit failing on main"
           existing="$(gh issue list --state open --search "$TITLE in:title" \
             --json number --jq '.[0].number // empty')"
