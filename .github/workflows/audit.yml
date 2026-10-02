@@ -54,6 +54,11 @@ jobs:
           # cops they enforce — the runner's brew and a contributor's local brew
           # flag different offences on identical files, so whatever the runner
           # demands is what gets fixed here.
+          # goreleaser can only emit the deprecated `postflight` stanza until
+          # goreleaser/goreleaser#6870 ships; convert its quarantine hook to
+          # `postflight_steps` in place first (see the script for why this
+          # can't be done through custom_block).
+          .github/scripts/postflight-steps.sh Casks/*.rb
           brew style --fix bronto-community/tap || true
           if git diff --quiet -- Casks; then
             echo "No style normalization needed."
