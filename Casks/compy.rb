@@ -2,18 +2,18 @@
 cask "compy" do
   version "0.2.0"
 
-  name "compy"
   on_macos do
-    on_intel do
-      sha256 "d294b70915a75e12c5617832d4fbf12f8a00521138bdb480f53ef0dca83ba6d5"
-      url "https://github.com/bronto-community/compy/releases/download/v#{version}/compy_#{version}_darwin_amd64.tar.gz"
-    end
     on_arm do
       sha256 "0d27cc24286f97e4268a03be0d894ef534bc0770ec1f6f10f46e2661eff61ff3"
       url "https://github.com/bronto-community/compy/releases/download/v#{version}/compy_#{version}_darwin_arm64.tar.gz"
     end
+    on_intel do
+      sha256 "d294b70915a75e12c5617832d4fbf12f8a00521138bdb480f53ef0dca83ba6d5"
+      url "https://github.com/bronto-community/compy/releases/download/v#{version}/compy_#{version}_darwin_amd64.tar.gz"
+    end
   end
 
+  name "compy"
   desc "Local OpenTelemetry Collector manager for the dev loop"
   homepage "https://github.com/bronto-community/compy"
 
