@@ -3,24 +3,23 @@ cask "bronto" do
   version "0.7.0"
 
   on_macos do
-    on_intel do
-      sha256 "cbdfd5f2df0580ffee27f3d1a033dd703fb423979200de2f9d30850d387afb8d"
-      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_amd64.tar.gz"
-    end
     on_arm do
       sha256 "cb71481405047290955c970687d1641ecd7e8107d44166f2dcb047bd592ed65e"
       url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_arm64.tar.gz"
     end
-  end
-
-  on_linux do
     on_intel do
-      sha256 "03ecff4e8a2dbc7cf098a3c800c400463b3ad3d07f9cbb4b11f1e603194159d9"
-      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_amd64.tar.gz"
+      sha256 "cbdfd5f2df0580ffee27f3d1a033dd703fb423979200de2f9d30850d387afb8d"
+      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_amd64.tar.gz"
     end
+  end
+  on_linux do
     on_arm do
       sha256 "05a858f9025b0685ff5ad007d397c6461c6b4fc71ac64d0f439752cf30bddcd9"
       url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_arm64.tar.gz"
+    end
+    on_intel do
+      sha256 "03ecff4e8a2dbc7cf098a3c800c400463b3ad3d07f9cbb4b11f1e603194159d9"
+      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_amd64.tar.gz"
     end
   end
 
@@ -37,10 +36,14 @@ cask "bronto" do
   fish_completion "completions/bronto.fish"
   zsh_completion "completions/bronto.zsh"
 
-  postflight do
-    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", staged_path] if OS.mac?
+  postflight_steps do
+    on_macos do
+      run "/usr/bin/xattr",
+          args:         ["-dr", "com.apple.quarantine", "."],
+          chdir:        ".",
+          must_succeed: false
+    end
   end
 
   # No zap stanza required
-
 end
