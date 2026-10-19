@@ -33,8 +33,8 @@ cask "bronto" do
 
   binary "bronto"
   bash_completion "completions/bronto.bash"
-  fish_completion "completions/bronto.fish"
   zsh_completion "completions/bronto.zsh"
+  fish_completion "completions/bronto.fish"
 
   postflight_steps do
     on_macos do
