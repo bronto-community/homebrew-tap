@@ -3,24 +3,23 @@ cask "bronto" do
   version "0.8.1"
 
   on_macos do
-    on_intel do
-      sha256 "0cadabf7f3d02c22e18b664aed98dab4fcb901883c98fdbab710fd44ecff27b5"
-      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_amd64.tar.gz"
-    end
     on_arm do
       sha256 "0c54343d600447c01054f127392ceaea493b4c481da9c7704659ecfe07e80e7a"
       url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_arm64.tar.gz"
     end
-  end
-
-  on_linux do
     on_intel do
-      sha256 "6f456fe3507f1567dc06695c91f79b42007e62e02c70f91913b0c346b184b9a7"
-      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_amd64.tar.gz"
+      sha256 "0cadabf7f3d02c22e18b664aed98dab4fcb901883c98fdbab710fd44ecff27b5"
+      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_darwin_amd64.tar.gz"
     end
+  end
+  on_linux do
     on_arm do
       sha256 "64d22d4be21a1dd3ed99b916247e0537231b1542e429e6ab1767d17f6829cc62"
       url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_arm64.tar.gz"
+    end
+    on_intel do
+      sha256 "6f456fe3507f1567dc06695c91f79b42007e62e02c70f91913b0c346b184b9a7"
+      url "https://github.com/bronto-community/bronto-cli/releases/download/v#{version}/bronto_#{version}_linux_amd64.tar.gz"
     end
   end
 
@@ -34,13 +33,17 @@ cask "bronto" do
 
   binary "bronto"
   bash_completion "completions/bronto.bash"
-  fish_completion "completions/bronto.fish"
   zsh_completion "completions/bronto.zsh"
+  fish_completion "completions/bronto.fish"
 
-  postflight do
-    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", staged_path] if OS.mac?
+  postflight_steps do
+    on_macos do
+      run "/usr/bin/xattr",
+          args:         ["-dr", "com.apple.quarantine", "."],
+          chdir:        ".",
+          must_succeed: false
+    end
   end
 
   # No zap stanza required
-
 end
